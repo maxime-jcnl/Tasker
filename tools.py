@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 import os
+from collections import deque
 
 def lire_tableau_contraintes():
     # retourne donc un dictionnaire avec comme clé le n° de la tache et en valeur un tuple (durée, liste de prédesseur)
@@ -79,5 +80,35 @@ def afficher_matrice(matrice: list):
     for i, ligne in enumerate(matrice):
         ligne_str = "  ".join(f"{elem:>3}" for elem in ligne)
         print(f"{i:>3}  {ligne_str}")
+def detecter_cycle(matrice):
+    n = len(matrice) # n = nb de tache de la matrice (fictifs compris)
+    indegree = [0] * n # degrée entrant
+    for i in range(n): # pour chaque sommet
+        for j in range(n):
+            if matrice[i][j] != '*' and isinstance(matrice[i][j], int): # verifie qu'il y a un entier
+                indegree[j] += 1 # Si "i -> j" existe on ajoute +1 au degré entrant de j
 
+    queue = deque()
+    for i in range(n): #
+        if indegree[i] == 0:
+            queue.append(i) #ajoute a la file tous les sommets sans prédecesseur
+    count = 0
 
+    while queue: # algorithme de Kahn
+        u = queue.popleft()
+        count += 1
+        for v in range(n):
+            if matrice[u][v] != '*' and isinstance(matrice[u][v], int):
+                indegree[v] -= 1
+                if indegree[v] == 0:
+                    queue.append(v)
+
+    return count != n
+def verifier_arcs_negatifs(matrice):
+    for i in range(len(matrice)):
+        for j in range(len(matrice[i])):
+            valeur = matrice[i][j]
+            if isinstance(valeur, int) and valeur < 0:
+                print(f"️Arc négatif détecté : {i} → {j} = {valeur}")
+                return False
+    return True
